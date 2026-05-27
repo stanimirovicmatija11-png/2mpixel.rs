@@ -18,34 +18,32 @@
     .mono { font-family: 'JetBrains Mono', monospace; }
 
     #grid-wrapper {
-      max-height: 88vh;
-      border: 1px solid rgba(0, 245, 200, 0.2);
-      box-shadow: 0 0 60px -20px rgba(0, 245, 200, 0.15);
+      height: calc(100vh - 85px);
+      border: 1px solid rgba(0, 245, 200, 0.25);
     }
 
     #canvas {
       image-rendering: pixelated;
       width: 100%;
-      height: auto;
-      max-height: 88vh;
+      height: 100%;
       display: block;
     }
 
+    /* FLIP CARD - popravljeno */
     .flip-card {
-      perspective: 1400px;
+      perspective: 1800px;
       position: absolute;
-      width: 400px;
-      height: 520px;
-      z-index: 100;
-      pointer-events: none;
+      width: 420px;
+      height: 560px;
+      z-index: 1000;
     }
     .flip-card-inner {
       position: relative;
       width: 100%;
       height: 100%;
-      transition: transform 0.95s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: transform 0.9s cubic-bezier(0.23, 1, 0.32, 1);
       transform-style: preserve-3d;
-      box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.6);
+      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.8);
     }
     .flip-card.flipped .flip-card-inner {
       transform: rotateY(180deg);
@@ -56,7 +54,7 @@
       height: 100%;
       backface-visibility: hidden;
       border: 3px solid var(--accent);
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
       background: #0a0a12;
     }
@@ -67,93 +65,59 @@
 </head>
 <body class="min-h-screen">
 
-  <!-- NAV -->
-  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur-md">
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/95 backdrop-blur-md">
     <div class="max-w-screen-2xl mx-auto px-8 py-4 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <span class="text-3xl tracking-tighter bebas text-white">2MPIXEL</span>
-        <span class="text-xs mono text-[#00f5c8] border border-[#00f5c8]/40 px-3 py-1">SRBIJA</span>
+        <span class="text-xs mono text-[#00f5c8]">SRBIJA</span>
       </div>
-      <div class="mono text-sm flex items-center gap-2">
-        <div class="w-2 h-2 bg-[#00f5c8] rounded-full animate-pulse"></div>
-        DIGITALNI ZID
-      </div>
+      <div class="mono text-sm">2.000.000 PIKSELA</div>
     </div>
   </nav>
 
-  <!-- Minimal Hero -->
-  <div class="pt-28 pb-6 px-8 text-center max-w-screen-2xl mx-auto">
-    <h1 class="bebas text-6xl md:text-[5.2rem] leading-none tracking-[-3px] text-white">
-      LJUDI<br>U KOJE<br>VERUJEMO.
-    </h1>
-    <p class="mt-4 text-gray-400 text-lg">2.000.000 piksela • Srpsko preduzetništvo</p>
-  </div>
-
-  <!-- GRID - glavni fokus -->
-  <div class="max-w-screen-2xl mx-auto px-8 relative" id="grid-wrapper">
+  <div class="pt-16 h-screen" id="grid-wrapper">
     <canvas id="canvas" width="2000" height="1000"></canvas>
   </div>
 
   <!-- Flip Card -->
   <div id="flip-card" class="flip-card hidden">
     <div class="flip-card-inner">
-      <!-- Front -->
-      <div class="flip-card-front p-8 flex flex-col">
+      <div class="flip-card-front p-10 flex flex-col">
         <div id="front-content" class="flex-1"></div>
         <button onclick="flipCard()" 
-                class="mt-auto text-sm mono border border-white/30 hover:border-[#00f5c8] px-8 py-4 rounded-full transition-colors">
-          PROČITAJ VIŠE →
+                class="mt-6 text-sm mono border border-white/40 hover:border-[#00f5c8] px-10 py-5 rounded-2xl transition-all">
+          PROČITAJ PRIČU →
         </button>
       </div>
-      <!-- Back -->
-      <div class="flip-card-back p-8 flex flex-col">
-        <button onclick="closeCard()" class="self-end text-xs mono text-gray-400 hover:text-white mb-6">✕ ZATVORI</button>
+      <div class="flip-card-back p-10 flex flex-col">
+        <button onclick="closeCard()" class="self-end mb-6 text-gray-400 hover:text-white">✕ ZATVORI</button>
         <div id="back-content" class="flex-1"></div>
       </div>
-    </div>
-  </div>
-
-  <!-- Wishlist -->
-  <div class="max-w-screen-2xl mx-auto px-8 py-16 border-t border-white/10 bg-black">
-    <div class="max-w-md mx-auto text-center">
-      <h2 class="bebas text-4xl mb-3">Želiš da budeš deo zida?</h2>
-      <p class="text-gray-400 mb-8">Pošalji zahtev — bićeš među prvima.</p>
-      
-      <form id="wishlist-form" class="space-y-6">
-        <input type="number" id="pixels" placeholder="Broj piksela (min 1000)" 
-               class="w-full bg-transparent border border-white/20 rounded-2xl px-6 py-6 text-center text-xl focus:border-[#00f5c8]">
-        <input type="email" id="email" placeholder="tvoj@email.rs" 
-               class="w-full bg-transparent border border-white/20 rounded-2xl px-6 py-6 text-center text-xl focus:border-[#00f5c8]">
-        <button type="submit" 
-                class="w-full bg-[#00f5c8] hover:bg-white text-black font-semibold py-6 rounded-2xl transition-all">
-          POŠALJI ZAHTEV
-        </button>
-      </form>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    let scale = 1.15;
-    let offsetX = -120;
-    let offsetY = -60;
+    let scale = 1.25;
+    let offsetX = -150;
+    let offsetY = -70;
     let isDragging = false;
     let lastX, lastY;
 
-    let occupiedBlocks = [
-      {x: 140, y: 110, w: 160, h: 95, color: '#00f5c8', name: "Pivara 011", city: "Beograd", desc: "Najbrže rastuća craft pivara u Srbiji. Ponosimo se srpskim ukusom."},
-      {x: 720, y: 260, w: 230, h: 115, color: '#ff4d94', name: "CodeCrafters", city: "Novi Sad", desc: "Moderni softver za srpske kompanije koje žele da rastu."},
-      {x: 1320, y: 140, w: 145, h: 145, color: '#00bfff', name: "Neural Balkans", city: "Novi Sad", desc: "Veštačka inteligencija za Balkan."},
-      {x: 380, y: 580, w: 175, h: 92, color: '#ffd700', name: "EcoPack", city: "Niš", desc: "Ekološka ambalaža za budućnost."},
+    const occupiedBlocks = [
+      {x: 150, y: 120, w: 180, h: 110, color: '#00f5c8', name: "Pivara 011", city: "Beograd", desc: "Najbrže rastuća craft pivara u Srbiji."},
+      {x: 720, y: 250, w: 260, h: 130, color: '#ff4d94', name: "CodeCrafters", city: "Novi Sad", desc: "Softver koji menja srpsko poslovanje."},
+      {x: 1300, y: 140, w: 170, h: 170, color: '#00bfff', name: "Neural Balkans", city: "Novi Sad", desc: "Veštačka inteligencija za Balkan."},
     ];
 
     function draw() {
       ctx.fillStyle = '#04040a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      for (let i = 0; i < 15000; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.06})`;
+      // Noise
+      for (let i = 0; i < 18000; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.07})`;
         ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
       }
 
@@ -161,43 +125,52 @@
         ctx.fillStyle = block.color + '22';
         ctx.fillRect(block.x, block.y, block.w, block.h);
         ctx.strokeStyle = block.color;
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 6;
         ctx.strokeRect(block.x, block.y, block.w, block.h);
 
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 23px JetBrains Mono';
-        ctx.fillText(block.name, block.x + 22, block.y + 52);
+        ctx.font = 'bold 26px JetBrains Mono';
+        ctx.fillText(block.name, block.x + 25, block.y + 60);
       });
     }
 
-    // Drag & Zoom
-    canvas.addEventListener('mousedown', e => { isDragging = true; lastX = e.offsetX; lastY = e.offsetY; });
+    // Mouse controls
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      lastX = e.offsetX;
+      lastY = e.offsetY;
+    });
+
     canvas.addEventListener('mousemove', e => {
       if (!isDragging) return;
       offsetX += (e.offsetX - lastX) / scale;
       offsetY += (e.offsetY - lastY) / scale;
-      lastX = e.offsetX; lastY = e.offsetY;
+      lastX = e.offsetX;
+      lastY = e.offsetY;
       draw();
     });
+
     window.addEventListener('mouseup', () => isDragging = false);
 
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
-      const delta = e.deltaY > 0 ? 0.9 : 1.11;
-      scale = Math.max(0.5, Math.min(7, scale * delta));
+      const delta = e.deltaY > 0 ? 0.9 : 1.12;
+      scale = Math.max(0.4, Math.min(8, scale * delta));
       draw();
     });
 
-    // Click
-    canvas.addEventListener('click', e => {
+    // CLICK - najvažnije
+    canvas.addEventListener('click', function(e) {
       const rect = canvas.getBoundingClientRect();
       const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
       const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
 
       for (let block of occupiedBlocks) {
-        if (clickX > block.x && clickX < block.x + block.w && clickY > block.y && clickY < block.y + block.h) {
+        if (clickX > block.x && clickX < block.x + block.w && 
+            clickY > block.y && clickY < block.y + block.h) {
+          
           showCard(block, e.clientX, e.clientY);
-          break;
+          return;
         }
       }
     });
@@ -207,36 +180,23 @@
       card.classList.remove('hidden');
       card.classList.remove('flipped');
 
-      card.style.left = `${clientX - 190}px`;
-      card.style.top = `${clientY - 220}px`;
+      card.style.left = (clientX - 200) + 'px';
+      card.style.top = (clientY - 250) + 'px';
 
       document.getElementById('front-content').innerHTML = `
-        <div style="color:\( {block.color}" class="text-5xl mb-2"> \){block.name}</div>
-        <div class="mono text-sm opacity-75">${block.city}</div>
+        <div style="color: \( {block.color}" class="text-6xl mb-4"> \){block.name}</div>
+        <div class="mono text-lg">${block.city}</div>
       `;
 
       document.getElementById('back-content').innerHTML = `
         <h3 class="bebas text-3xl mb-6">${block.name}</h3>
         <p class="text-gray-300 leading-relaxed">${block.desc}</p>
-        <div class="mt-10 flex gap-4">
-          <button onclick="window.open('https://example.com','_blank')" class="bg-[#00f5c8] text-black px-7 py-3.5 rounded-full font-medium">Poseti sajt →</button>
-        </div>
+        <button onclick="window.open('https://example.com','_blank')" class="mt-8 bg-[#00f5c8] text-black px-8 py-4 rounded-2xl font-semibold">Poseti sajt →</button>
       `;
     }
 
-    function flipCard() {
-      document.getElementById('flip-card').classList.add('flipped');
-    }
-
-    function closeCard() {
-      document.getElementById('flip-card').classList.add('hidden');
-    }
-
-    document.getElementById('wishlist-form').addEventListener('submit', e => {
-      e.preventDefault();
-      alert("✅ Hvala! Kontaktiraćemo te uskoro.");
-      e.target.reset();
-    });
+    window.flipCard = () => document.getElementById('flip-card').classList.add('flipped');
+    window.closeCard = () => document.getElementById('flip-card').classList.add('hidden');
 
     draw();
   </script>
