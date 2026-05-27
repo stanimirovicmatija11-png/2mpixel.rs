@@ -29,21 +29,20 @@
       display: block;
     }
 
-    /* FLIP CARD - popravljeno */
+    /* Flip Card - ostaje na mestu bloka */
     .flip-card {
-      perspective: 1800px;
+      perspective: 2000px;
       position: absolute;
-      width: 420px;
-      height: 560px;
       z-index: 1000;
+      transition: all 0.4s ease;
     }
     .flip-card-inner {
       position: relative;
       width: 100%;
       height: 100%;
-      transition: transform 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
       transform-style: preserve-3d;
-      box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 30px 70px -15px rgba(0,0,0,0.8);
     }
     .flip-card.flipped .flip-card-inner {
       transform: rotateY(180deg);
@@ -53,7 +52,7 @@
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border: 3px solid var(--accent);
+      border: 4px solid var(--accent);
       border-radius: 4px;
       overflow: hidden;
       background: #0a0a12;
@@ -75,22 +74,21 @@
     </div>
   </nav>
 
-  <div class="pt-16 h-screen" id="grid-wrapper">
+  <div class="pt-16 h-screen relative" id="grid-wrapper">
     <canvas id="canvas" width="2000" height="1000"></canvas>
   </div>
 
   <!-- Flip Card -->
   <div id="flip-card" class="flip-card hidden">
     <div class="flip-card-inner">
-      <div class="flip-card-front p-10 flex flex-col">
+      <div class="flip-card-front p-8 flex flex-col">
         <div id="front-content" class="flex-1"></div>
-        <button onclick="flipCard()" 
-                class="mt-6 text-sm mono border border-white/40 hover:border-[#00f5c8] px-10 py-5 rounded-2xl transition-all">
+        <button onclick="flipCard()" class="mt-6 text-sm mono border border-white/40 hover:border-[#00f5c8] px-8 py-4 rounded-2xl">
           PROČITAJ PRIČU →
         </button>
       </div>
-      <div class="flip-card-back p-10 flex flex-col">
-        <button onclick="closeCard()" class="self-end mb-6 text-gray-400 hover:text-white">✕ ZATVORI</button>
+      <div class="flip-card-back p-8 flex flex-col">
+        <button onclick="closeCard()" class="self-end mb-6 text-gray-400 hover:text-white">✕</button>
         <div id="back-content" class="flex-1"></div>
       </div>
     </div>
@@ -115,7 +113,6 @@
       ctx.fillStyle = '#04040a';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Noise
       for (let i = 0; i < 18000; i++) {
         ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.07})`;
         ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 1, 1);
@@ -134,22 +131,14 @@
       });
     }
 
-    // Mouse controls
-    canvas.addEventListener('mousedown', e => {
-      isDragging = true;
-      lastX = e.offsetX;
-      lastY = e.offsetY;
-    });
-
+    canvas.addEventListener('mousedown', e => { isDragging = true; lastX = e.offsetX; lastY = e.offsetY; });
     canvas.addEventListener('mousemove', e => {
       if (!isDragging) return;
       offsetX += (e.offsetX - lastX) / scale;
       offsetY += (e.offsetY - lastY) / scale;
-      lastX = e.offsetX;
-      lastY = e.offsetY;
+      lastX = e.offsetX; lastY = e.offsetY;
       draw();
     });
-
     window.addEventListener('mouseup', () => isDragging = false);
 
     canvas.addEventListener('wheel', e => {
@@ -159,7 +148,7 @@
       draw();
     });
 
-    // CLICK - najvažnije
+    // Klik na blok
     canvas.addEventListener('click', function(e) {
       const rect = canvas.getBoundingClientRect();
       const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -169,29 +158,34 @@
         if (clickX > block.x && clickX < block.x + block.w && 
             clickY > block.y && clickY < block.y + block.h) {
           
-          showCard(block, e.clientX, e.clientY);
+          showCardOnBlock(block, rect, e.clientX, e.clientY);
           return;
         }
       }
     });
 
-    function showCard(block, clientX, clientY) {
+    function showCardOnBlock(block, canvasRect, clientX, clientY) {
       const card = document.getElementById('flip-card');
+      const blockScreenX = canvasRect.left + (block.x + block.w/2) * (canvasRect.width / canvas.width) - 210;
+      const blockScreenY = canvasRect.top + (block.y + block.h/2) * (canvasRect.height / canvas.height) - 280;
+
+      card.style.left = blockScreenX + 'px';
+      card.style.top = blockScreenY + 'px';
+      card.style.width = '420px';
+      card.style.height = '560px';
+
       card.classList.remove('hidden');
       card.classList.remove('flipped');
 
-      card.style.left = (clientX - 200) + 'px';
-      card.style.top = (clientY - 250) + 'px';
-
       document.getElementById('front-content').innerHTML = `
-        <div style="color: \( {block.color}" class="text-6xl mb-4"> \){block.name}</div>
-        <div class="mono text-lg">${block.city}</div>
+        <div style="color: \( {block.color}" class="text-5xl mb-4"> \){block.name}</div>
+        <div class="mono">${block.city}</div>
       `;
 
       document.getElementById('back-content').innerHTML = `
         <h3 class="bebas text-3xl mb-6">${block.name}</h3>
-        <p class="text-gray-300 leading-relaxed">${block.desc}</p>
-        <button onclick="window.open('https://example.com','_blank')" class="mt-8 bg-[#00f5c8] text-black px-8 py-4 rounded-2xl font-semibold">Poseti sajt →</button>
+        <p class="text-gray-300">${block.desc}</p>
+        <button onclick="window.open('https://example.com','_blank')" class="mt-8 bg-[#00f5c8] text-black px-8 py-4 rounded-2xl">Poseti sajt →</button>
       `;
     }
 
