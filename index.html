@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2MPIXEL — Digitalni zid Srbije</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #00f5c8;
+    }
+    body {
+      font-family: 'Syne', system-ui, sans-serif;
+      background: #04040a;
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+    .bebas { font-family: 'Bebas Neue', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .hero-text {
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+    }
+
+    #canvas {
+      image-rendering: pixelated;
+      cursor: none;
+    }
+
+    .custom-cursor {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      mix-blend-mode: difference;
+      display: none;
+    }
+
+    .flip-card {
+      perspective: 1000px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border: 2px solid var(--accent);
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-md">
+    <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl tracking-tighter bebas text-white">2MPIXEL</span>
+        <span class="text-xs tracking-widest mono text-[#00f5c8] border border-[#00f5c8]/30 px-2.5 py-1">SRBIJA</span>
+      </div>
+      <div class="text-sm mono flex items-center gap-2">
+        <div class="w-2 h-2 bg-[#00f5c8] rounded-full animate-pulse"></div>
+        DIGITALNI ZID SRBIJE
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="pt-32 pb-16 px-8 max-w-screen-2xl mx-auto text-center">
+    <p class="text-[#00f5c8] tracking-[3px] mono text-sm mb-4">SRPSKI DIGITALNI POKRET</p>
+    <h1 class="hero-text bebas text-white leading-none">
+      LJUDI<br>
+      U KOJE<br>
+      VERUJEMO.
+    </h1>
+    <p class="max-w-2xl mx-auto mt-8 text-lg text-gray-400">
+      2.000.000 piksela. Svaki blok je stvaran biznis, startup ili preduzetnik iz Srbije.<br>
+      Ovo nije reklama. Ovo je zajednica.
+    </p>
+
+    <div class="mt-12 flex justify-center gap-12 text-left">
+      <div>
+        <div id="pixels-used" class="mono text-5xl font-bold text-white">1,247,890</div>
+        <div class="text-sm text-gray-500">piksela zauzeto</div>
+      </div>
+      <div>
+        <div class="mono text-5xl font-bold text-[#00f5c8]">62.4%</div>
+        <div class="text-sm text-gray-500">zida popunjeno</div>
+      </div>
+    </div>
+
+    <div class="mt-8 text-xs mono text-gray-500 flex items-center justify-center gap-2">
+      <div class="h-px w-12 bg-white/20"></div>
+      SCROLL DA BI VIDEO ZID
+      <div class="h-px w-12 bg-white/20"></div>
+    </div>
+  </section>
+
+  <!-- GRID CONTAINER -->
+  <div class="max-w-screen-2xl mx-auto px-8 relative">
+    <div id="grid-wrapper" class="relative border border-white/10 bg-black rounded-xl overflow-hidden shadow-2xl">
+      <canvas id="canvas" width="2000" height="1000" class="w-full h-auto"></canvas>
+      
+      <!-- Minimap -->
+      <div id="minimap" class="absolute bottom-6 right-6 w-48 h-24 border border-white/30 bg-black/80 rounded overflow-hidden cursor-pointer"></div>
+    </div>
+  </div>
+
+  <!-- WISHLIST -->
+  <section class="max-w-screen-2xl mx-auto px-8 mt-20">
+    <div class="border border-white/10 rounded-2xl p-10 bg-black/50">
+      <h2 class="bebas text-4xl mb-2">Želiš da budeš deo zida?</h2>
+      <p class="text-gray-400 mb-8">Reci nam koliko piksela ti treba. Prvi ćemo te kontaktirati.</p>
+      
+      <form id="wishlist-form" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-xs mono mb-2 text-gray-500">KOLIKO PIKSELA?</label>
+          <input type="number" id="pixels" placeholder="5000" 
+                 class="w-full bg-transparent border border-white/20 rounded-lg px-6 py-5 text-xl focus:outline-none focus:border-[#00f5c8]">
+        </div>
+        <div>
+          <label class="block text-xs mono mb-2 text-gray-500">EMAIL</label>
+          <input type="email" id="email" placeholder="tvojeime@biznis.rs"
+                 class="w-full bg-transparent border border-white/20 rounded-lg px-6 py-5 text-xl focus:outline-none focus:border-[#00f5c8]">
+        </div>
+        <div class="flex items-end">
+          <button type="submit"
+                  class="w-full bg-[#00f5c8] hover:bg-white text-black font-semibold py-5 rounded-lg transition-all active:scale-95">
+            POŠALJI ZAHTEV
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Flip Card Modal -->
+  <div id="card-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
+    <div id="flip-card" class="flip-card w-full max-w-md mx-4">
+      <div class="flip-card-inner">
+        <!-- Front -->
+        <div class="flip-card-front bg-[#0a0a12] p-8 rounded-2xl">
+          <div id="card-front-content" class="text-center"></div>
+          <button onclick="flipCard()" 
+                  class="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs mono tracking-widest border border-white/30 px-6 py-3 rounded-full hover:border-[#00f5c8]">
+            VIŠE O NJIMA →
+          </button>
+        </div>
+        <!-- Back -->
+        <div class="flip-card-back bg-[#0a0a12] p-8 rounded-2xl">
+          <div id="card-back-content"></div>
+          <button onclick="closeCard()" 
+                  class="absolute top-6 right-6 text-xs mono text-gray-400 hover:text-white">✕ ZATVORI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === CANVAS SETUP ===
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+    let lastX, lastY;
+
+    // Fake occupied blocks (for demo)
+    let occupiedBlocks = [
+      {x: 200, y: 150, w: 120, h: 80, color: '#00f5c8', name: "Pivara 011", city: "Beograd"},
+      {x: 850, y: 320, w: 180, h: 90, color: '#ff4d94', name: "CodeCrafters", city: "Novi Sad"},
+      {x: 420, y: 680, w: 150, h: 70, color: '#00bfff', name: "EcoPack", city: "Niš"},
+      {x: 1250, y: 180, w: 100, h: 100, color: '#ffd700', name: "Neural Balkans", city: "Novi Sad"},
+    ];
+
+    function drawCanvas() {
+      ctx.fillStyle = '#04040a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Noise effect
+      for (let i = 0; i < 8000; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.08})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      // Draw occupied blocks
+      occupiedBlocks.forEach(block => {
+        ctx.fillStyle = block.color + '22';
+        ctx.fillRect(block.x, block.y, block.w, block.h);
+        ctx.strokeStyle = block.color;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(block.x, block.y, block.w, block.h);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 18px JetBrains Mono';
+        ctx.fillText(block.name, block.x + 15, block.y + 35);
+      });
+    }
+
+    // Basic zoom and pan
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      scale = Math.max(0.5, Math.min(8, scale * delta));
+      drawCanvas();
+    });
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true;
+      lastX = e.offsetX;
+      lastY = e.offsetY;
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      offsetX += (e.offsetX - lastX) / scale;
+      offsetY += (e.offsetY - lastY) / scale;
+      lastX = e.offsetX;
+      lastY = e.offsetY;
+      drawCanvas();
+    });
+
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    // Click detection (simplified)
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) / (rect.width / canvas.width);
+      const clickY = (e.clientY - rect.top) / (rect.height / canvas.height);
+
+      for (let block of occupiedBlocks) {
+        if (clickX > block.x && clickX < block.x + block.w &&
+            clickY > block.y && clickY < block.y + block.h) {
+          showCard(block);
+          break;
+        }
+      }
+    });
+
+    // Card System
+    function showCard(block) {
+      document.getElementById('card-modal').classList.remove('hidden');
+      document.getElementById('flip-card').classList.remove('flipped');
+
+      document.getElementById('card-front-content').innerHTML = `
+        <div class="text-5xl mb-4" style="color:${block.color}">${block.name}</div>
+        <div class="mono text-sm text-gray-400">${block.city} • Preduzetnik</div>
+      `;
+
+      document.getElementById('card-back-content').innerHTML = `
+        <h3 class="text-2xl bebas mb-6">${block.name}</h3>
+        <p class="text-gray-300 leading-relaxed mb-8">
+          Jedan od prvih koji je verovao u srpski digitalni zid. 
+          Gradimo budućnost zajedno.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="#" class="bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm">Instagram</a>
+          <a href="#" class="bg-white/10 hover:bg-white/20 px-5 py-2 rounded-full text-sm">TikTok</a>
+          <a href="#" onclick="window.open('https://example.com', '_blank')" 
+             class="bg-[#00f5c8] text-black px-6 py-2 rounded-full text-sm font-semibold">Poseti sajt →</a>
+        </div>
+      `;
+    }
+
+    function flipCard() {
+      document.getElementById('flip-card').classList.add('flipped');
+    }
+
+    function closeCard() {
+      document.getElementById('card-modal').classList.add('hidden');
+    }
+
+    // Wishlist form
+    document.getElementById('wishlist-form').addEventListener('submit', e => {
+      e.preventDefault();
+      alert("✅ Zahtev primljen. Bićemo u kontaktu uskoro.");
+      e.target.reset();
+    });
+
+    // Initial draw
+    drawCanvas();
+
+    // Live counter
+    let count = 1247890;
+    setInterval(() => {
+      count += Math.floor(Math.random() * 70) + 20;
+      document.getElementById('pixels-used').textContent = count.toLocaleString('sr-RS');
+    }, 3400);
+  </script>
+</body>
+</html>
