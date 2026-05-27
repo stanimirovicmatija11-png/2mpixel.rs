@@ -176,4 +176,69 @@
       if (!isDragging) return;
       offsetX += (e.offsetX - lastX) / scale;
       offsetY += (e.offsetY - lastY) / scale;
-      lastX = e.offsetX; lastY = e
+      lastX = e.offsetX; lastY = e.offsetY;
+      draw();
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.11;
+      scale = Math.max(0.5, Math.min(7, scale * delta));
+      draw();
+    });
+
+    // Click
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+      for (let block of occupiedBlocks) {
+        if (clickX > block.x && clickX < block.x + block.w && clickY > block.y && clickY < block.y + block.h) {
+          showCard(block, e.clientX, e.clientY);
+          break;
+        }
+      }
+    });
+
+    function showCard(block, clientX, clientY) {
+      const card = document.getElementById('flip-card');
+      card.classList.remove('hidden');
+      card.classList.remove('flipped');
+
+      card.style.left = `${clientX - 190}px`;
+      card.style.top = `${clientY - 220}px`;
+
+      document.getElementById('front-content').innerHTML = `
+        <div style="color:\( {block.color}" class="text-5xl mb-2"> \){block.name}</div>
+        <div class="mono text-sm opacity-75">${block.city}</div>
+      `;
+
+      document.getElementById('back-content').innerHTML = `
+        <h3 class="bebas text-3xl mb-6">${block.name}</h3>
+        <p class="text-gray-300 leading-relaxed">${block.desc}</p>
+        <div class="mt-10 flex gap-4">
+          <button onclick="window.open('https://example.com','_blank')" class="bg-[#00f5c8] text-black px-7 py-3.5 rounded-full font-medium">Poseti sajt →</button>
+        </div>
+      `;
+    }
+
+    function flipCard() {
+      document.getElementById('flip-card').classList.add('flipped');
+    }
+
+    function closeCard() {
+      document.getElementById('flip-card').classList.add('hidden');
+    }
+
+    document.getElementById('wishlist-form').addEventListener('submit', e => {
+      e.preventDefault();
+      alert("✅ Hvala! Kontaktiraćemo te uskoro.");
+      e.target.reset();
+    });
+
+    draw();
+  </script>
+</body>
+</html>
